@@ -3,9 +3,10 @@ package treeformator
 import "fmt"
 
 const (
-	space = "  "
-	last  = "|-"
-	line  = "| "
+	space   = "  "
+	last    = "\\-"
+	line    = "| "
+	notlast = "|-"
 )
 
 type TreeFormatorNodeInfo struct {
@@ -26,8 +27,7 @@ func NewTreeFormatorNodeInfo(r TreeFormator, root *TreeFormatorNodeInfo, isLast 
 }
 
 func ShowTreeStruct(r TreeFormator) {
-	strs := []string{}
-	dfs(NewTreeFormatorNodeInfo(r, nil, true), strs)
+	strs := dfs(NewTreeFormatorNodeInfo(r, nil, true))
 	for _, str := range strs {
 		fmt.Println(str)
 	}
@@ -38,56 +38,82 @@ func (r *TreeFormatorNodeInfo) Show() string {
 }
 
 func buildPrefix(r *TreeFormatorNodeInfo) string {
-	root := r.root
-	hasLast := false
-	cur := ""
-	for root != nil {
-		if root.isLast {
-			if !hasLast {
-				cur = last + r.Show()
-			} else {
-				cur = space + r.Show()
-			}
+	if r == nil {
+		return ""
+	}
+	cur := r.Show()
+	if r.root == nil {
+		return cur
+	} else {
+		if r.isLast {
+			cur = last + cur
+		} else {
+			cur = notlast + cur
 		}
-		root = root.root
+	}
+	curNode := r.root
+	root := curNode.root
+	for root != nil {
+		if curNode.isLast {
+			cur = space + cur
+		} else {
+			cur = line + cur
+		}
+		curNode = root
+		root = curNode.root
 	}
 	return cur
 }
 
-func dfs(r *TreeFormatorNodeInfo, str []string) {
+func dfs(r *TreeFormatorNodeInfo) (str []string) {
 	if r == nil {
-		return
+		return []string{}
 	}
 	nextLevelNodes := r.NextLevel()
 	str = append(str, buildPrefix(r))
 	for i, child := range nextLevelNodes {
-		dfs(NewTreeFormatorNodeInfo(child, r, i == len(nextLevelNodes)), str)
+		str = append(str, dfs(NewTreeFormatorNodeInfo(child, r, i == len(nextLevelNodes)-1))...)
 	}
+	return
 }
 
 type TreeFormatorBinTreeImpl struct {
-	value string
-	left  *TreeFormatorBinTreeImpl
-	right *TreeFormatorBinTreeImpl
+	Value interface{}
+	Left  *TreeFormatorBinTreeImpl
+	Right *TreeFormatorBinTreeImpl
 	root  *TreeFormatorBinTreeImpl
 }
 
 func (t *TreeFormatorBinTreeImpl) Show() string {
-	return t.value
+	return fmt.Sprintf("%+v", t.Value)
 }
 
 func (t *TreeFormatorBinTreeImpl) NextLevel() []TreeFormator {
-	res := []TreeFormator{t.right}
-	cur := t.right
-	for cur != nil {
-		res = append(res, cur)
-		cur = cur.right
+	if t.Right == nil {
+		return []TreeFormator{}
+	}
+	res := []TreeFormator{}
+	if t.Left != nil {
+		res = append(res, t.Left)
+	}
+	if t.Right != nil {
+		res = append(res, t.Right)
 	}
 	return res
 }
 
 func (t *TreeFormatorBinTreeImpl) Root() TreeFormator {
 	return t.root
+}
+
+func (t *TreeFormatorBinTreeImpl) SetLeft(obj interface{}) TreeFormator {
+	t.Left = &TreeFormatorBinTreeImpl{obj, nil, nil, t}
+	return t.Left
+}
+
+func (t *TreeFormatorBinTreeImpl) SetRight(obj interface{}) TreeFormator {
+	t.Right = &TreeFormatorBinTreeImpl{obj, nil, nil, t}
+	return t.Right
 }
 
 func BuildSampleTree() (root *TreeFormatorBinTreeImpl) {
@@ -97,5 +123,11 @@ func BuildSampleTree() (root *TreeFormatorBinTreeImpl) {
 		&TreeFormatorBinTreeImpl{"c", nil, nil, root},
 		nil,
 	}
+	root.Left.SetLeft("d")
+	root.Left.SetRight("e")
+	root.Right.SetLeft("f")
+	root.Right.SetRight("g")
+	root.Right.Left.SetRight("h")
+	root.Right.Left.Right.SetRight("i")
 	return
 }
