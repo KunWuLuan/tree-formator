@@ -1,5 +1,7 @@
 package treeformator
 
+import "fmt"
+
 const (
 	space = "  "
 	last  = "|-"
@@ -7,29 +9,32 @@ const (
 )
 
 type TreeFormatorNodeInfo struct {
-	node   *TreeFormator
+	node   TreeFormator
 	root   *TreeFormatorNodeInfo
 	isLast bool
 }
 
-func (r TreeFormatorNodeInfo) NextLevel() []*TreeFormator {
+func (r TreeFormatorNodeInfo) NextLevel() []TreeFormator {
 	if r.node == nil {
 		return nil
 	}
-	return (*r.node).NextLevel()
+	return r.node.NextLevel()
 }
 
-func NewTreeFormatorNodeInfo(r *TreeFormator, root *TreeFormatorNodeInfo, isLast bool) *TreeFormatorNodeInfo {
+func NewTreeFormatorNodeInfo(r TreeFormator, root *TreeFormatorNodeInfo, isLast bool) *TreeFormatorNodeInfo {
 	return &TreeFormatorNodeInfo{r, root, isLast}
 }
 
 func ShowTreeStruct(r TreeFormator) {
 	strs := []string{}
-	dfs(NewTreeFormatorNodeInfo(&r, nil, true), strs)
+	dfs(NewTreeFormatorNodeInfo(r, nil, true), strs)
+	for _, str := range strs {
+		fmt.Println(str)
+	}
 }
 
 func (r *TreeFormatorNodeInfo) Show() string {
-	return (*r.node).Show()
+	return r.node.Show()
 }
 
 func buildPrefix(r *TreeFormatorNodeInfo) string {
@@ -60,19 +65,19 @@ func dfs(r *TreeFormatorNodeInfo, str []string) {
 	}
 }
 
-type treeFormatorBinTreeImpl struct {
+type TreeFormatorBinTreeImpl struct {
 	value string
-	left  *treeFormatorBinTreeImpl
-	right *treeFormatorBinTreeImpl
-	root  *treeFormatorBinTreeImpl
+	left  *TreeFormatorBinTreeImpl
+	right *TreeFormatorBinTreeImpl
+	root  *TreeFormatorBinTreeImpl
 }
 
-func (t treeFormatorBinTreeImpl) Show() string {
+func (t *TreeFormatorBinTreeImpl) Show() string {
 	return t.value
 }
 
-func (t treeFormatorBinTreeImpl) NextLevel() []*treeFormatorBinTreeImpl {
-	res := []*treeFormatorBinTreeImpl{t.right}
+func (t *TreeFormatorBinTreeImpl) NextLevel() []TreeFormator {
+	res := []TreeFormator{t.right}
 	cur := t.right
 	for cur != nil {
 		res = append(res, cur)
@@ -81,6 +86,16 @@ func (t treeFormatorBinTreeImpl) NextLevel() []*treeFormatorBinTreeImpl {
 	return res
 }
 
-func (t treeFormatorBinTreeImpl) Root() *treeFormatorBinTreeImpl {
+func (t *TreeFormatorBinTreeImpl) Root() TreeFormator {
 	return t.root
+}
+
+func BuildSampleTree() (root *TreeFormatorBinTreeImpl) {
+	root = &TreeFormatorBinTreeImpl{
+		"a",
+		&TreeFormatorBinTreeImpl{"b", nil, nil, root},
+		&TreeFormatorBinTreeImpl{"c", nil, nil, root},
+		nil,
+	}
+	return
 }

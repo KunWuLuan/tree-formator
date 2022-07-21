@@ -6,6 +6,6 @@ type Printer interface {
 
 type TreeFormator interface {
 	Printer
-	NextLevel() []*TreeFormator
-	Root() *TreeFormator
+	NextLevel() []TreeFormator
+	Root() TreeFormator
 }
