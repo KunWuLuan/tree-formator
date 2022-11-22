@@ -40,6 +40,9 @@ type StringLevelTree struct {
 }
 
 func (t *StringLevelTree) Show() string {
+	if t.Value == nil {
+		return ""
+	}
 	str, ok := t.Value.(string)
 	if !ok {
 		glog.Errorf("node value is not string type:%v", t.Value)
