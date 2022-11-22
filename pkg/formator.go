@@ -63,7 +63,7 @@ func (tp *treePrinterImpl) BuildPrefix(r *TreeFormatorNodeInfo) string {
 	if r == nil {
 		return ""
 	}
-	cur := r.Show()
+	cur := "" //r.Show()
 	if r.root == nil {
 		return cur
 	} else {
@@ -92,7 +92,25 @@ func (tp *treePrinterImpl) Dfs(r *TreeFormatorNodeInfo) (str []string) {
 		return []string{}
 	}
 	nextLevelNodes := r.NextLevel()
-	str = append(str, tp.BuildPrefix(r))
+	prefix := tp.BuildPrefix(r)
+	nodeStr := r.Show()
+	if r.root != nil {
+		var paddingLine string
+		if len(prefix) > 0 {
+			if r.isLast {
+				paddingLine = prefix[:len(prefix)-len(tp.last)] + tp.line
+			} else {
+				paddingLine = prefix[:len(prefix)-len(tp.notlast)] + tp.line
+			}
+		} else {
+			paddingLine = ""
+		}
+		for i := 0; i < tp.linewidth; i++ {
+			str = append(str, paddingLine)
+		}
+	}
+	line := prefix + nodeStr
+	str = append(str, line)
 	for i, child := range nextLevelNodes {
 		str = append(str, tp.Dfs(NewTreeFormatorNodeInfo(child, r, i == len(nextLevelNodes)-1))...)
 	}
@@ -161,8 +179,8 @@ func WithLast(s string) Option {
 	}
 }
 
-func WithNoLast(s string) Option {
+func WithNotLast(s string) Option {
 	return func(tp TreePrinter) error {
-		return tp.SetProperty("nolast", s)
+		return tp.SetProperty("notlast", s)
 	}
 }
