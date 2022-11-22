@@ -1,8 +1,8 @@
 package main
 
-import treeformator "github.com/tree-formator/pkg"
+import treeformator "github.com/KunWuLuan/tree-formator/pkg"
 
 func main() {
-	tree := treeformator.BuildSampleTree()
+	tree := treeformator.BuildTest()
 	treeformator.ShowTreeStruct(tree)
 }
